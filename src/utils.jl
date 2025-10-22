@@ -5,10 +5,24 @@ using Literate
 
 function generate_index(root::String)
     open(normpath(joinpath(root, "src", "index.md")), write=true) do io
-        for line in eachline(normpath(joinpath(root, "..", "README.md")))
+        lines = collect(eachline(normpath(joinpath(root, "..", "README.md"))))
+        for line in lines
             if occursin("<!--", line) && occursin("-->", line)
                 comment_content = match(r"<!--(.*)-->", line).captures[1]
                 write(io, comment_content * "\n")
+            else
+                write(io, line * "\n")
+            end
+        end
+
+        in_julia_block = false
+        for line in lines
+            if occursin("```julia", line)
+                write(io, "```@example\n")
+                in_julia_block = true
+            elseif in_julia_block && occursin("```", line)
+                write(io, "nothing # hide\n```\n")
+                in_julia_block = false
             else
                 write(io, line * "\n")
             end
@@ -125,4 +139,3 @@ function generate_docs(
         deploydocs_kwargs...,
     )
 end
-
