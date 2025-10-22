@@ -18,13 +18,13 @@ function generate_index(root::String)
         in_julia_block = false
         for line in lines
             # skip short julia repl exprs
-            if occursin("```julia repl", line)
+            if occursin("```julia", line)
                 continue
             end
 
             # replace julia code blocks with @example blocks for Documenter to run
             # to determine correctness and compat with latest version of repo
-            if occursin("```julia", line)
+            if occursin("```julia example", line)
                 write(io, "```@example\n")
                 in_julia_block = true
             elseif in_julia_block && occursin("```", line)
