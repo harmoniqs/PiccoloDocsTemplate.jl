@@ -5,14 +5,38 @@ using Literate
 
 function generate_index(root::String)
     open(normpath(joinpath(root, "src", "index.md")), write=true) do io
-        for line in eachline(normpath(joinpath(root, "..", "README.md")))
+        lines = collect(eachline(normpath(joinpath(root, "..", "README.md"))))
+
+        for (i, line) in enumerate(lines)
             if occursin("<!--", line) && occursin("-->", line)
                 comment_content = match(r"<!--(.*)-->", line).captures[1]
-                write(io, comment_content * "\n")
+                lines[i] = comment_content
             else
-                write(io, line * "\n")
+                lines[i] = line
             end
         end
+
+        in_julia_block = false
+        for (i, line) in enumerate(lines)
+            # skip short julia repl exprs
+            if occursin("```julia", line)
+                lines[i] = line
+            end
+
+            # replace julia code blocks with @example blocks for Documenter to run
+            # to determine correctness and compat with latest version of repo
+            if occursin("```julia example", line)
+                lines[i] = "```@example"
+                in_julia_block = true
+            elseif in_julia_block && occursin("```", line)
+                lines[i] = "nothing # hide\n```"
+                in_julia_block = false
+            else
+                lines[i] = line
+            end
+        end
+
+        write(io, join(lines, "\n"))
     end
 end
 
@@ -125,4 +149,3 @@ function generate_docs(
         deploydocs_kwargs...,
     )
 end
-
