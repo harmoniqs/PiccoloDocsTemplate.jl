@@ -26,8 +26,6 @@ function generate_index(root::String)
                 write(io, line * "\n")
             end
 
-            if
-
             if occursin("<!--", line) && occursin("-->", line)
                 comment_content = match(r"<!--(.*)-->", line).captures[1]
                 write(io, comment_content * "\n")
