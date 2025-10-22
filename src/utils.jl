@@ -7,32 +7,36 @@ function generate_index(root::String)
     open(normpath(joinpath(root, "src", "index.md")), write=true) do io
         lines = collect(eachline(normpath(joinpath(root, "..", "README.md"))))
 
+        for (i, line) in enumerate(lines)
+            if occursin("<!--", line) && occursin("-->", line)
+                comment_content = match(r"<!--(.*)-->", line).captures[1]
+                lines[i] = comment_content
+            else
+                lines[i] = line
+            end
+        end
+
         in_julia_block = false
-        for line in lines
+        for (i, line) in enumerate(lines)
             # skip short julia repl exprs
             if occursin("```julia", line)
-                write(io, line * "\n")
+                lines[i] = line
             end
 
             # replace julia code blocks with @example blocks for Documenter to run
             # to determine correctness and compat with latest version of repo
             if occursin("```julia example", line)
-                write(io, "```@example\n")
+                lines[i] = "```@example"
                 in_julia_block = true
             elseif in_julia_block && occursin("```", line)
-                write(io, "nothing # hide\n```\n")
+                lines[i] = "nothing # hide\n```"
                 in_julia_block = false
             else
-                write(io, line * "\n")
-            end
-
-            if occursin("<!--", line) && occursin("-->", line)
-                comment_content = match(r"<!--(.*)-->", line).captures[1]
-                write(io, comment_content * "\n")
-            else
-                write(io, line * "\n")
+                lines[i] = line
             end
         end
+
+        write(io, join(lines, "\n"))
     end
 end
 
