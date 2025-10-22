@@ -3,7 +3,7 @@
 Simply
 
 ```
-Pkg.add(url="https://github.com/harmoniqs/doc_template", rev="v0.3.0")
+Pkg.add(url="https://github.com/harmoniqs/PiccoloDocsTemplate.jl", rev="v0.3.0")
 Pkg.instantiate()
 ```
 
@@ -39,4 +39,10 @@ Here's a sentence that get's displayed in both places
 
 ```julia example
 1 + 1
+```
+
+(what gets generated in index.md, nothing at end suppresses output for index pages)
+```@example
+1 + 1
+nothing # hide
 ```
