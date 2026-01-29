@@ -61,8 +61,6 @@ function generate_literate(root::String; draft_pages::Vector = nothing)
         splitext(file)[2] == ".jl" || continue
         ipath = joinpath(root, file)
         opath = splitdir(replace(ipath, lit=>lit_output))[1]
-        println(ipath)
-        println(opath)
         if file in draft_pages
             Literate.markdown(ipath, opath; preprocess = add_draft_to_meta)
         else
