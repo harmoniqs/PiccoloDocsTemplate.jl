@@ -5,9 +5,9 @@ using Literate
 
 function add_draft_to_meta(str::String)
     draft_meta_string = """
-    ```@meta
-    Draft = true
-    ```
+    # ```@meta
+    # Draft = true
+    # ```
 
     """
 
