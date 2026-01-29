@@ -89,7 +89,7 @@ function generate_docs(
     make_index=true,
     make_literate=true,
     make_assets=true,
-    draft_pages::Vector=nothing,    # must be a subset of the intersection of literate pages and the pages vector.
+    literate_draft_pages::Vector=nothing,    # must be a subset of literate pages inside of `src/literate`
     repo="github.com/harmoniqs/" * package_name * ".jl.git",
     versions=["dev" => "dev", "stable" => "v^", "v#.#"],
     format_kwargs=NamedTuple(),
@@ -108,7 +108,7 @@ function generate_docs(
     end
 
     if make_literate
-        generate_literate(root, draft_pages = draft_pages)
+        generate_literate(root, draft_pages = literate_draft_pages)
     end
 
     if make_assets
