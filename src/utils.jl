@@ -89,7 +89,7 @@ function generate_docs(
     make_index=true,
     make_literate=true,
     make_assets=true,
-    draft_pages::Vector=nothing,    # must be a subset of pages vector
+    draft_pages::Vector=nothing,    # must be a subset of the intersection of literate pages and the pages vector.
     repo="github.com/harmoniqs/" * package_name * ".jl.git",
     versions=["dev" => "dev", "stable" => "v^", "v#.#"],
     format_kwargs=NamedTuple(),
@@ -138,12 +138,6 @@ function generate_docs(
         )),
         format_kwargs...,
     )
-
-    for draft_page in draft_pages
-        if draft_page in pages
-            DocMeta.setdocmeta!()
-        end
-    end
 
     # for each mod in modules, make a call to DocMeta.setdocmeta!(module, :DocTestSetup, doctest_setup_meta_args; recursive=true)
     for mod in modules
