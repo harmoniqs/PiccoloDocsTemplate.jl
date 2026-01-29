@@ -3,6 +3,17 @@ export generate_docs
 using Documenter
 using Literate
 
+function add_draft_to_meta(str::String)
+    draft_meta_string = """
+    ```@meta
+    Draft = true
+    ```
+
+    """
+
+    return draft_meta_string * str
+end
+
 function generate_index(root::String)
     open(normpath(joinpath(root, "src", "index.md")), write=true) do io
         lines = collect(eachline(normpath(joinpath(root, "..", "README.md"))))
@@ -40,7 +51,7 @@ function generate_index(root::String)
     end
 end
 
-function generate_literate(root::String)
+function generate_literate(root::String; draft_pages::Vector = nothing)
     src = normpath(joinpath(root, "src"))
     lit = normpath(joinpath(root, "literate"))
 
@@ -52,7 +63,11 @@ function generate_literate(root::String)
         opath = splitdir(replace(ipath, lit=>lit_output))[1]
         println(ipath)
         println(opath)
-        Literate.markdown(ipath, opath)
+        if file in draft_pages
+            Literate.markdown(ipath, opath; preprocess = add_draft_to_meta)
+        else
+            Literate.markdown(ipath, opath)
+        end
     end
 end
 
@@ -74,6 +89,7 @@ function generate_docs(
     make_index=true,
     make_literate=true,
     make_assets=true,
+    draft_pages::Vector=nothing,    # must be a subset of pages vector
     repo="github.com/harmoniqs/" * package_name * ".jl.git",
     versions=["dev" => "dev", "stable" => "v^", "v#.#"],
     format_kwargs=NamedTuple(),
@@ -92,7 +108,7 @@ function generate_docs(
     end
 
     if make_literate
-        generate_literate(root)
+        generate_literate(root, draft_pages)
     end
 
     if make_assets
@@ -122,6 +138,12 @@ function generate_docs(
         )),
         format_kwargs...,
     )
+
+    for draft_page in draft_pages
+        if draft_page in pages
+            DocMeta.setdocmeta!()
+        end
+    end
 
     # for each mod in modules, make a call to DocMeta.setdocmeta!(module, :DocTestSetup, doctest_setup_meta_args; recursive=true)
     for mod in modules
