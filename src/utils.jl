@@ -108,7 +108,7 @@ function generate_docs(
     end
 
     if make_literate
-        generate_literate(root, draft_pages)
+        generate_literate(root, draft_pages = draft_pages)
     end
 
     if make_assets
