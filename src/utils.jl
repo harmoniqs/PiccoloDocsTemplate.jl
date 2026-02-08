@@ -64,7 +64,7 @@ function generate_literate(root::String; draft_pages::Vector = nothing)
         if file in draft_pages
             Literate.markdown(ipath, opath; preprocess = add_draft_to_meta)
         else
-            Literate.markdown(ipath, opath)
+            Literate.markdown(ipath, opath, execute=true)
         end
     end
 end
