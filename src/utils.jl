@@ -64,7 +64,7 @@ function generate_literate(root::String; draft_pages::Vector = nothing)
         if file in draft_pages
             Literate.markdown(ipath, opath; preprocess = add_draft_to_meta)
         else
-            Literate.markdown(ipath, opath)
+            Literate.markdown(ipath, opath, execute=false)
         end
     end
 end
@@ -117,6 +117,8 @@ function generate_docs(
         prettyurls=get(ENV, "CI", "false") == "true",
         # canonical="",
         edit_link="main",
+        size_threshold = 300 * 2^13, # Raise to 2 MiB
+        size_threshold_warn = 200 * 2^12, # Warn at 500 KiB
         assets=String[],
         mathengine = MathJax3(Dict(
             :loader => Dict("load" => ["[tex]/physics"]),
