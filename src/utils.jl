@@ -51,7 +51,7 @@ function generate_index(root::String)
     end
 end
 
-function generate_literate(root::String; draft_pages::Vector = nothing)
+function generate_literate(root::String; draft_pages::Vector = nothing, literate_kwargs::NamedTuple = NamedTuple())
     src = normpath(joinpath(root, "src"))
     lit = normpath(joinpath(root, "literate"))
 
@@ -62,9 +62,9 @@ function generate_literate(root::String; draft_pages::Vector = nothing)
         ipath = joinpath(root, file)
         opath = splitdir(replace(ipath, lit=>lit_output))[1]
         if file in draft_pages
-            Literate.markdown(ipath, opath; preprocess = add_draft_to_meta)
+            Literate.markdown(ipath, opath; preprocess = add_draft_to_meta, literate_kwargs...)
         else
-            Literate.markdown(ipath, opath)
+            Literate.markdown(ipath, opath; literate_kwargs...)
         end
     end
 end
@@ -88,6 +88,7 @@ function generate_docs(
     make_literate=true,
     make_assets=true,
     literate_draft_pages::Vector=nothing,    # must be a subset of literate pages inside of `src/literate`
+    literate_kwargs::NamedTuple=NamedTuple(),    # kwargs passed to Literate.markdown (e.g. execute=false)
     repo="github.com/harmoniqs/" * package_name * ".jl.git",
     versions=["dev" => "dev", "stable" => "v^", "v#.#"],
     format_kwargs=NamedTuple(),
@@ -106,7 +107,7 @@ function generate_docs(
     end
 
     if make_literate
-        generate_literate(root, draft_pages = literate_draft_pages)
+        generate_literate(root, draft_pages = literate_draft_pages, literate_kwargs = literate_kwargs)
     end
 
     if make_assets
