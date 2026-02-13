@@ -15,7 +15,7 @@ function add_draft_to_meta(str::String)
 end
 
 function generate_index(root::String)
-    open(normpath(joinpath(root, "src", "index.md")), write=true) do io
+    open(normpath(joinpath(root, "src", "index.md")), write = true) do io
         lines = collect(eachline(normpath(joinpath(root, "..", "README.md"))))
 
         for (i, line) in enumerate(lines)
@@ -51,7 +51,11 @@ function generate_index(root::String)
     end
 end
 
-function generate_literate(root::String; draft_pages::Vector = nothing, literate_kwargs::NamedTuple = NamedTuple())
+function generate_literate(
+    root::String;
+    draft_pages::Vector = nothing,
+    literate_kwargs::NamedTuple = NamedTuple(),
+)
     src = normpath(joinpath(root, "src"))
     lit = normpath(joinpath(root, "literate"))
 
@@ -60,9 +64,14 @@ function generate_literate(root::String; draft_pages::Vector = nothing, literate
     for (root, _, files) ∈ walkdir(lit), file ∈ files
         splitext(file)[2] == ".jl" || continue
         ipath = joinpath(root, file)
-        opath = splitdir(replace(ipath, lit=>lit_output))[1]
+        opath = splitdir(replace(ipath, lit => lit_output))[1]
         if file in draft_pages
-            Literate.markdown(ipath, opath; preprocess = add_draft_to_meta, literate_kwargs...)
+            Literate.markdown(
+                ipath,
+                opath;
+                preprocess = add_draft_to_meta,
+                literate_kwargs...,
+            )
         else
             Literate.markdown(ipath, opath; literate_kwargs...)
         end
@@ -75,26 +84,26 @@ function generate_assets(root::String)
 
     assets_output = joinpath(src, "assets")
 
-    cp(assets, assets_output, force=true)
+    cp(assets, assets_output, force = true)
 end
 
 
 function generate_docs(
     root::String,
     package_name::String,
-    modules::Union{Module, Vector{Module}},
+    modules::Union{Module,Vector{Module}},
     pages::Vector;
-    make_index=true,
-    make_literate=true,
-    make_assets=true,
-    literate_draft_pages::Vector=nothing,    # must be a subset of literate pages inside of `src/literate`
-    literate_kwargs::NamedTuple=NamedTuple(),    # kwargs passed to Literate.markdown (e.g. execute=false)
-    repo="github.com/harmoniqs/" * package_name * ".jl.git",
-    versions=["dev" => "dev", "stable" => "v^", "v#.#"],
-    format_kwargs=NamedTuple(),
-    makedocs_kwargs=NamedTuple(),
-    deploydocs_kwargs=NamedTuple(),
-    doctest_setup_meta_args::Dict{Module, Expr} = Dict{Module, Expr}(),
+    make_index = true,
+    make_literate = true,
+    make_assets = true,
+    literate_draft_pages::Vector = nothing,    # must be a subset of literate pages inside of `src/literate`
+    literate_kwargs::NamedTuple = NamedTuple(),    # kwargs passed to Literate.markdown (e.g. execute=false)
+    repo = "github.com/harmoniqs/" * package_name * ".jl.git",
+    versions = ["stable" => "v^", "v#.#", "dev" => "dev"],
+    format_kwargs = NamedTuple(),
+    makedocs_kwargs = NamedTuple(),
+    deploydocs_kwargs = NamedTuple(),
+    doctest_setup_meta_args::Dict{Module,Expr} = Dict{Module,Expr}(),
 )
     @info "Building Documenter site for " * package_name * ".jl"
 
@@ -107,7 +116,11 @@ function generate_docs(
     end
 
     if make_literate
-        generate_literate(root, draft_pages = literate_draft_pages, literate_kwargs = literate_kwargs)
+        generate_literate(
+            root,
+            draft_pages = literate_draft_pages,
+            literate_kwargs = literate_kwargs,
+        )
     end
 
     if make_assets
@@ -115,45 +128,47 @@ function generate_docs(
     end
 
     format = Documenter.HTML(;
-        prettyurls=get(ENV, "CI", "false") == "true",
+        prettyurls = get(ENV, "CI", "false") == "true",
         # canonical="",
-        edit_link="main",
-        assets=String[],
-        mathengine = MathJax3(Dict(
-            :loader => Dict("load" => ["[tex]/physics"]),
-            :tex => Dict(
-                "inlineMath" => [["\$","\$"], ["\\(","\\)"]],
-                "tags" => "ams",
-                "packages" => [
-                    "base",
-                    "ams",
-                    "autoload",
-                    "physics"
-                ],
-                "macros" => Dict(
-                    "minimize" => ["\\underset{#1}{\\operatorname{minimize}}", 1],
-                )
+        edit_link = "main",
+        assets = String[],
+        mathengine = MathJax3(
+            Dict(
+                :loader => Dict("load" => ["[tex]/physics"]),
+                :tex => Dict(
+                    "inlineMath" => [["\$", "\$"], ["\\(", "\\)"]],
+                    "tags" => "ams",
+                    "packages" => ["base", "ams", "autoload", "physics"],
+                    "macros" => Dict(
+                        "minimize" => ["\\underset{#1}{\\operatorname{minimize}}", 1],
+                    ),
+                ),
             ),
-        )),
+        ),
         format_kwargs...,
     )
 
     # for each mod in modules, make a call to DocMeta.setdocmeta!(module, :DocTestSetup, doctest_setup_meta_args; recursive=true)
     for mod in modules
         if haskey(doctest_setup_meta_args, mod)
-            DocMeta.setdocmeta!(mod, :DocTestSetup, doctest_setup_meta_args[mod]; recursive=true)
+            DocMeta.setdocmeta!(
+                mod,
+                :DocTestSetup,
+                doctest_setup_meta_args[mod];
+                recursive = true,
+            )
         end
     end
 
     makedocs(;
-        modules=modules,
-        authors="Aaron Trowbridge <aaron.j.trowbridge@gmail.com> and contributors",
-        sitename=package_name * ".jl",
-        format=format,
-        pages=pages,
-        pagesonly=true,
-        warnonly=true,
-        draft=false,
+        modules = modules,
+        authors = "Aaron Trowbridge <aaron.j.trowbridge@gmail.com> and contributors",
+        sitename = package_name * ".jl",
+        format = format,
+        pages = pages,
+        pagesonly = true,
+        warnonly = true,
+        draft = false,
         makedocs_kwargs...,
     )
 
@@ -164,10 +179,5 @@ function generate_docs(
         ENV["GITHUB_EVENT_NAME"] = "push"
     end
 
-    deploydocs(;
-        repo=repo,
-        devbranch="main",
-        versions=versions,
-        deploydocs_kwargs...,
-    )
+    deploydocs(; repo = repo, devbranch = "main", versions = versions, deploydocs_kwargs...)
 end
