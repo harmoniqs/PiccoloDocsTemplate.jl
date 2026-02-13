@@ -157,6 +157,13 @@ function generate_docs(
         makedocs_kwargs...,
     )
 
+    # Documenter.jl only deploys for push, workflow_dispatch, or schedule events.
+    # TagBot triggers docs via repository_dispatch, which Documenter rejects.
+    # Override the event name so versioned docs actually deploy.
+    if get(ENV, "GITHUB_EVENT_NAME", "") == "repository_dispatch"
+        ENV["GITHUB_EVENT_NAME"] = "push"
+    end
+
     deploydocs(;
         repo=repo,
         devbranch="main",
