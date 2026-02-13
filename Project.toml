@@ -1,7 +1,7 @@
 name = "PiccoloDocsTemplate"
 uuid = "a90a139f-c522-4b23-980b-4210ddb8d065"
 authors = ["Gennadi Ryan <gennadiryan@gmail.com>"]
-version = "0.6.0"
+version = "0.7.0"
 
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
