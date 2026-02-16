@@ -53,7 +53,7 @@ end
 
 function generate_literate(
     root::String;
-    draft_pages::Union{Vector, Nothing} = nothing,
+    draft_pages::Vector = String[],
     literate_kwargs::NamedTuple = NamedTuple(),
 )
     src = normpath(joinpath(root, "src"))
@@ -96,7 +96,7 @@ function generate_docs(
     make_index = true,
     make_literate = true,
     make_assets = true,
-    literate_draft_pages::Union{Vector, Nothing} = nothing,    # must be a subset of literate pages inside of `src/literate`
+    literate_draft_pages::Vector = String[],    # must be a subset of literate pages inside of `src/literate`
     literate_kwargs::NamedTuple = NamedTuple(),    # kwargs passed to Literate.markdown (e.g. execute=false)
     repo = "github.com/harmoniqs/" * package_name * ".jl.git",
     versions = ["stable" => "v^", "v#.#", "dev" => "dev"],
