@@ -88,6 +88,56 @@ function generate_assets(root::String)
 end
 
 
+"""
+    _mask_cached_solve!(build_dir)
+
+Walk HTML files in `build_dir` and replace `cached_solve!` with `solve!`,
+stripping the cache name argument so end users see clean API calls.
+Skips `lib.html` (API reference) where `cached_solve!` should remain documented.
+"""
+function _mask_cached_solve!(build_dir::String)
+    for (root, _, files) in walkdir(build_dir)
+        for file in files
+            endswith(file, ".html") || continue
+            path = joinpath(root, file)
+
+            # Skip API reference — cached_solve! is a real exported function
+            endswith(path, "lib.html") && continue
+
+            content = read(path, String)
+            original = content
+
+            # 1. Rename function
+            content = replace(content, "cached_solve!" => "solve!")
+
+            # 2. Strip name arg — single-line: solve!(var, "name"; → solve!(var;
+            #    Handles HTML-entity quotes (&quot;, &#34;) and raw quotes
+            content = replace(
+                content,
+                r"solve!\((\w+),\s*(?:&quot;|&#34;|\")[^\"&]*(?:&quot;|&#34;|\")\s*;" =>
+                    s"solve!(\1;",
+            )
+
+            # 3. Strip name arg — single-line no kwargs: solve!(var, "name") → solve!(var)
+            content = replace(
+                content,
+                r"solve!\((\w+),\s*(?:&quot;|&#34;|\")[^\"&]*(?:&quot;|&#34;|\")\s*\)" =>
+                    s"solve!(\1)",
+            )
+
+            # 4. Strip name arg — multi-line: var,\n    "name"; → var;
+            content = replace(
+                content,
+                r"(\w+),\s*\n(\s*)(?:&quot;|&#34;|\")[^\"&\n]*(?:&quot;|&#34;|\")\s*;" =>
+                    s"\1;",
+            )
+
+            content != original && write(path, content)
+        end
+    end
+end
+
+
 function generate_docs(
     root::String,
     package_name::String,
@@ -104,6 +154,7 @@ function generate_docs(
     makedocs_kwargs = NamedTuple(),
     deploydocs_kwargs = NamedTuple(),
     doctest_setup_meta_args::Dict{Module,Expr} = Dict{Module,Expr}(),
+    mask_cached_solve::Bool = false,
 )
     @info "Building Documenter site for " * package_name * ".jl"
 
@@ -171,6 +222,10 @@ function generate_docs(
         draft = false,
         makedocs_kwargs...,
     )
+
+    if mask_cached_solve
+        _mask_cached_solve!(joinpath(root, "build"))
+    end
 
     # Documenter.jl only deploys for push, workflow_dispatch, or schedule events.
     # TagBot triggers docs via repository_dispatch, which Documenter rejects.
