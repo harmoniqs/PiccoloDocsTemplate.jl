@@ -3,7 +3,7 @@
 Simply
 
 ```
-Pkg.add(url="https://github.com/harmoniqs/PiccoloDocsTemplate.jl", rev="v0.7.1")
+Pkg.add(url="https://github.com/harmoniqs/PiccoloDocsTemplate.jl", rev="v0.3.0")
 Pkg.instantiate()
 ```
 
