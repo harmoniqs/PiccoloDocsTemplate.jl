@@ -218,7 +218,14 @@ function generate_docs(
         format = format,
         pages = pages,
         pagesonly = true,
-        warnonly = true,
+        warnonly = Documenter.except(
+            :eval_block,
+            :example_block,
+            :setup_block,
+            :parse_error,
+            :doctest,
+            :cross_references,
+        ),
         draft = false,
         makedocs_kwargs...,
     )
