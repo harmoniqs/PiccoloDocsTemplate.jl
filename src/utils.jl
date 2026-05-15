@@ -87,6 +87,16 @@ function generate_assets(root::String)
     cp(assets, assets_output, force = true)
 end
 
+function generate_contributing(root::String)
+    src = normpath(joinpath(root, "src"))
+    contributing = normpath(joinpath(root, "..", "CONTRIBUTING.md"))
+
+    contributing_output = joinpath(src, "development", "contributing.md")
+    mkpath(dirname(contributing_output))
+
+    cp(contributing, contributing_output, force = true)
+end
+
 
 """
     _mask_cached_solve!(build_dir)
@@ -146,6 +156,7 @@ function generate_docs(
     make_index = true,
     make_literate = true,
     make_assets = true,
+    make_contributing = false,
     literate_draft_pages::Vector = String[],    # must be a subset of literate pages inside of `src/literate`
     literate_kwargs::NamedTuple = NamedTuple(),    # kwargs passed to Literate.markdown (e.g. execute=false)
     repo = "github.com/harmoniqs/" * package_name * ".jl.git",
@@ -176,6 +187,10 @@ function generate_docs(
 
     if make_assets
         generate_assets(root)
+    end
+
+    if make_contributing
+        generate_contributing(root)
     end
 
     format = Documenter.HTML(;
